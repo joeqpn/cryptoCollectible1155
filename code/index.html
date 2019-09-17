@@ -1,0 +1,364 @@
+<!--rename to index1155.html if you want to use the erc20 version-->
+<html>
+    <head>
+        <title>Our awesome game</title>
+        <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+        <script src="eth1155.js"></script>
+    </head>
+
+    <body>
+        <h1>Collect Bitcoin Game</h1>
+        <button onClick="buy(1)"> Buy Boost Talisman, 0.0001 ETH</button>
+        <br>
+        <button onClick="buy(2)"> Buy Super Boots, 0.0002 ETH</button>
+        <br>
+        <button onClick="buy(3)"> Buy Time Warp Cape, 0.0003 ETH</button>
+        <br>
+        <script>
+
+            var cursors;
+            var knight;
+            var crates;
+            var coinTimer;
+            var score = 0;
+            var scoreText;
+            var pauseGame = false;
+            var secondsLeft = 30;
+            var timeLeftText;
+            var timeLeftTimer;
+
+            var gameOver = false;
+
+            //Game Defaults - if you own no 1155 tokens...
+            //pump talisman 25% more coins fall from the sky
+            var COIN_GENERATION_INTERVAL_DEFAULT = 3000;
+            var COIN_GENERATION_INTERVAL = 3000;
+            // Super boots 30% speed boost
+            var PLAYER_SPEED_DEFAULT = 200;
+            var PLAYER_SPEED = 200;
+            // Time Warp Cape - 50% reduction in how long a second is
+            // default to 1 second...will reasign it with purchase of token
+            var GAME_SECOND_DEFAULT = 1000;
+            var GAME_SECOND = 1000;
+
+
+
+            //configure the game
+            //(height, width, render-type, game loop functiojns)
+            var config  = {
+                width:800,
+                height:500,
+                type:Phaser.AUTO,
+                
+                scene:{
+                    preload: gamePreload,
+                    create: gameCreate,
+                    update: gameUpdate
+                },
+
+                physics:{
+                    default:"arcade",
+                    arcade:{
+                        gravity:{y:800},
+                        debug: false
+                    }
+                }
+            }
+            //lets get balances for purchased items when file loads
+            // getUserItems(function(){
+            //     console.log("callback is called");
+            // });
+            
+            var game;
+            getUserItems(function(){
+                console.log("Callback completed");
+                //initialize game console only after gameItems have loaded...
+                game = new Phaser.Game(config);
+                //show the new settings with blockchain applied values...
+                console.log("Creating coin timer with: " + COIN_GENERATION_INTERVAL);
+                console.log("Player speed is: " + PLAYER_SPEED);
+                console.log("Capes time delay is: " + GAME_SECOND);
+                
+            });
+                
+
+            
+
+            function gamePreload(){
+                //loading assets (this runs once)
+                console.log("GAME PRELOADING!");
+                console.log("The game is loading assets");
+                this.load.image("knight", "assets/knight.png");
+                this.load.image("crate", "assets/crate.png");
+                this.load.image("background", "assets/background.png");
+                this.load.image("bitcoin", "assets/bitcoin.png");
+
+                // load the run animation
+                this.load.image("run_frame_1", "assets/knight/run/Run (1).png");
+                this.load.image("run_frame_2", "assets/knight/run/Run (2).png");
+                this.load.image("run_frame_3", "assets/knight/run/Run (3).png");
+                this.load.image("run_frame_4", "assets/knight/run/Run (4).png");
+                this.load.image("run_frame_5", "assets/knight/run/Run (5).png");
+                this.load.image("run_frame_6", "assets/knight/run/Run (6).png");
+                this.load.image("run_frame_7", "assets/knight/run/Run (7).png");
+                this.load.image("run_frame_8", "assets/knight/run/Run (8).png");
+                this.load.image("run_frame_9", "assets/knight/run/Run (9).png");
+                this.load.image("run_frame_10", "assets/knight/run/Run (10).png");
+
+                //load the idle animation
+                this.load.image("idle_frame_1", "assets/knight/idle/Idle (1).png");
+                this.load.image("idle_frame_2", "assets/knight/idle/Idle (2).png");
+                this.load.image("idle_frame_3", "assets/knight/idle/Idle (3).png");
+                this.load.image("idle_frame_4", "assets/knight/idle/Idle (4).png");
+                this.load.image("idle_frame_5", "assets/knight/idle/Idle (5).png");
+                this.load.image("idle_frame_6", "assets/knight/idle/Idle (6).png");
+                this.load.image("idle_frame_7", "assets/knight/idle/Idle (7).png");
+                this.load.image("idle_frame_8", "assets/knight/idle/Idle (8).png");
+                this.load.image("idle_frame_9", "assets/knight/idle/Idle (9).png");
+                this.load.image("idle_frame_10", "assets/knight/idle/Idle (10).png");
+            }
+
+            function gameCreate(){
+                //initial setup logic on the asset and other setup stuff (this runs once)
+                console.log("The game is setting up the assets");
+
+                //create the background
+                this.add.image(300,150,"background");
+
+                //create the knight x,y,object_name
+                knight = this.physics.add.sprite(200,100,"knight");
+                knight.body.setSize(300,550, true);
+                //scale 1 = 100%
+                knight.scaleX = 0.15;
+                knight.scaleY = knight.scaleX;
+                //can't run off the ends of the screen (just through the bottom)
+                knight.body.collideWorldBounds = true;
+
+                //create the crate
+                crates = this.physics.add.staticGroup();
+ 
+
+                //floor
+                crates.create(40,460,"crate");
+                crates.create(120,460,"crate");
+                crates.create(200,460,"crate");
+                crates.create(280,460,"crate");
+                crates.create(360,460,"crate");
+                crates.create(440,460,"crate");
+                crates.create(760,460,"crate");
+
+                //crates in the air
+                crates.create(440,360,"crate");
+                crates.create(500,260,"crate");
+                crates.create(280,260,"crate");
+                crates.create(200,200,"crate");
+                crates.create(640,160,"crate");
+                crates.create(680,360,"crate");
+                crates.create(600,360,"crate");
+
+                // create run animations
+                this.anims.create({
+                    key: "knight_run",
+                    frames:[
+                        {key: "run_frame_1"},
+                        {key: "run_frame_2"},
+                        {key: "run_frame_3"},
+                        {key: "run_frame_4"},
+                        {key: "run_frame_5"},
+                        {key: "run_frame_6"},
+                        {key: "run_frame_7"},
+                        {key: "run_frame_8"},
+                        {key: "run_frame_9"},
+                        {key: "run_frame_10"},
+                    ],
+                    frameRate: 20,
+                    repeat: 1
+                });
+
+                // create idle animations
+                this.anims.create({
+                    key: "knight_idle",
+                    frames:[
+                        {key: "idle_frame_1"},
+                        {key: "idle_frame_2"},
+                        {key: "idle_frame_3"},
+                        {key: "idle_frame_4"},
+                        {key: "idle_frame_5"},
+                        {key: "idle_frame_6"},
+                        {key: "idle_frame_7"},
+                        {key: "idle_frame_8"},
+                        {key: "idle_frame_9"},
+                        {key: "idle_frame_10"},
+                    ],
+                    frameRate: 10,
+                    repeat: 1
+                });
+
+                //crate is static knight is non-static...make it so that collision stops knight.
+                this.physics.add.collider(crates, knight);
+
+                scoreText = this.add.text(
+                    16, 
+                    16, 
+                    "Bitcoin Bag: 0", 
+                    {fontSize: "16px",
+                    fill: "#000"
+                });
+
+                timeLeftText = this.add.text(
+                    16, 
+                    48,
+                    secondsLeft + " seconds left", 
+                    {fontSize: "16px",
+                    fill: "#f00"
+                });
+
+                purchasedTalismans = this.add.text(
+                    550, 
+                    16, 
+                    "Purchased Talismans: " + numberOfTalismans, 
+                    {fontSize: "16px",
+                    fill: "#000"
+                });
+
+                purchasedBoots = this.add.text(
+                    550, 
+                    32, 
+                    "Purchased Boots:     " + numberOfBoots, 
+                    {fontSize: "16px",
+                    fill: "#000"
+                });
+
+                purchasedCapes = this.add.text(
+                    550, 
+                    48, 
+                    "Purchased Capes:     " + numberOfCapes, 
+                    {fontSize: "16px",
+                    fill: "#000"
+                });
+
+                //initialize cursors
+                cursors = this.input.keyboard.createCursorKeys();
+                //console.log("Creating coin timer with:" + COIN_GENERATION_INTERVAL);
+                //how often to drop coins 3 seconds callback generatecoins
+
+                    coinTimer = this.time.addEvent({
+                        //delay: Phaser.Math.Between(0,COIN_GENERATION_INTERVAL), 
+                        delay: COIN_GENERATION_INTERVAL,
+                        callback: generateCoins,
+                        callbackScope: this,
+                        repeat: -1
+                    });
+
+                //console.log("Capes time delay is: " + GAME_SECOND);
+                timeLeftTimer = this.time.addEvent({
+                    delay: GAME_SECOND, //delay 1000 would behave like normal timer
+                    callback: updateTimeLeft,
+                    callbackScope: this,
+                    repeat: -1
+                });
+
+
+//TODO: create a start game button...then they can buy assets prior to starting the game.
+            }
+
+            function updateTimeLeft(){
+                while (secondsLeft > 0 && pauseGame == false) {
+                    //decriment by 1
+                    secondsLeft--;
+                    timeLeftText.setText(secondsLeft + " seconds left");
+                    
+                    if(secondsLeft <= 0){
+                        this.physics.pause();
+                        gameOver = true;
+                        gameOverText = this.add.text(
+                            275, 
+                            100,
+                            "GAME OVER", 
+                            {fontSize: "50px",
+                            fill: "#000"
+                        });
+
+                    }
+                    return;
+                }
+                //decriment by 1
+                //secondsLeft--;
+                //timeLeftText.setText(secondsLeft + " seconds left");
+                //console.log("seconds left: " + secondsLeft);
+
+            }
+
+            function generateCoins(){
+                if (pauseGame == false) {
+                    //console.log("Generating coins!!");
+                    var coins = this.physics.add.group({
+                        key: "bitcoin",
+                        repeat: 1,
+                        setXY: {
+                            x: Phaser.Math.Between(20,780),
+                            y: -100,
+                            stepX: Phaser.Math.Between(30,500)
+                        }
+
+                    });
+
+                    coins.children.iterate(function(child){
+                        //code to execute on each coin
+                        child.setBounceY(Phaser.Math.FloatBetween(0.4,1.0));
+
+
+                    });
+
+
+                    this.physics.add.collider(coins,crates);
+                    this.physics.add.overlap(knight, coins, collectCoin, null, this);
+                }
+
+            }
+
+            function collectCoin(knight, coin){
+                //console.log("Collecting Coin...");
+                coin.disableBody(true, true);
+                score++;
+                //console.log("Score is now: " + score)
+                scoreText.setText("Bitcoin Bag:" + score);
+            }
+
+            
+            function gameUpdate(){
+                //console.log("Player speed is: " + PLAYER_SPEED);
+                //monitoring inputs and telling game how to update (loops: this runs 60 times/frames per second)
+                //console.log("The game is updating...")
+                // handle moving left and right
+                if(pauseGame == false) {
+                    if(cursors.left.isDown){
+                        //console.log("left key down");
+                        knight.setVelocityX(-PLAYER_SPEED); // was -200
+                        knight.play("knight_run", true);
+                        knight.flipX = true;
+                    }
+                    else if(cursors.right.isDown){
+                        //console.log("right key down");
+                        knight.setVelocityX(PLAYER_SPEED); // was 200
+                        knight.play("knight_run", true);
+                        knight.flipX = false;
+                    }
+                    else{
+                        knight.setVelocityX(0);
+                        knight.play("knight_idle", true);
+                    }
+
+                    if(cursors.up.isDown && knight.body.touching.down){
+                        knight.setVelocityY(-450);
+                    }
+                }
+                
+            }
+
+        </script>
+        
+    </body>
+
+</html>
