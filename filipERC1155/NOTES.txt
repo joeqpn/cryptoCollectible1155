@@ -1,0 +1,7 @@
+//Commands in truffle console
+(await GameToken.at("0x9D732a868C9A5d004B50E1d7b5Bebc2E3333a882")).creators(3)
+(await GameToken.at("0x9D732a868C9A5d004B50E1d7b5Bebc2E3333a882")).balanceOf("0x777e25d5f8d47BFddd186b612e6f143F58B15865", 1).then(bn => bn.toNumber())
+
+
+
+

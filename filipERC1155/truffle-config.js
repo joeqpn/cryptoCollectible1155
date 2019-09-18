@@ -9,8 +9,8 @@
  * truffleframework.com/docs/advanced/configuration
  *
  * To deploy via Infura you'll need a wallet provider (like truffle-hdwallet-provider)
- * to sign your transactions before they're sent to a remote public node. Infura API
- * keys are available for free at: infura.io/register
+ * to sign your transactions before they're sent to a remote public node. Infura accounts
+ * are available for free at: infura.io/register.
  *
  * You'll also need a mnemonic - the twelve word phrase the wallet uses to generate
  * public/private key pairs. If you're publishing your code to GitHub make sure you load this
@@ -18,11 +18,14 @@
  *
  */
 
-// const HDWalletProvider = require('truffle-hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
+const HDWalletProvider = require('truffle-hdwallet-provider');
+//this is the ropsten key
+const infuraKey = "db7a4bd577ba4c7ab8593520c14d59c4";
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
+const mnemonic = "riot unfold abstract person auto garage agree midnight lizard only bike club accident child wall chief develop before wagon race tilt absorb interest field";
+
 
 module.exports = {
   /**
@@ -60,14 +63,15 @@ module.exports = {
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-    // ropsten: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraKey}`),
-      // network_id: 3,       // Ropsten's id
-      // gas: 5500000,        // Ropsten has a lower block limit than mainnet
-      // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
-    // },
+    //Joe: must install npm install truffle-hdwallet-provider to use infura
+    ropsten: {
+      provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/${infuraKey}`),
+      network_id: 3,       // Ropsten's id
+      gas: 5500000,        // Ropsten has a lower block limit than mainnet
+      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    },
 
     // Useful for private networks
     // private: {
