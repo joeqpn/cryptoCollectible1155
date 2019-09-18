@@ -1,3 +1,10 @@
+
+//Deployment procedures
+If you use the current version of the sol files on the ropsten testnet then you can just start
+the webserver in the code directory and play the game given you have an account with ETH on ropsten.
+ If you change functionality within the .sol or you migrate the contracts to another network
+ ...you will have to copy the abi and paste it into the code/eth1155.js file
+
 //Commands in truffle console
 (await GameToken.at("0x9D732a868C9A5d004B50E1d7b5Bebc2E3333a882")).creators(3)
 (await GameToken.at("0x9D732a868C9A5d004B50E1d7b5Bebc2E3333a882")).balanceOf("0x777e25d5f8d47BFddd186b612e6f143F58B15865", 1).then(bn => bn.toNumber())
