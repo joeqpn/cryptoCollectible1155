@@ -67,24 +67,13 @@ Verify if the ETH has arrived in your address through Metamask
 You can also verifiy if the ETH has arrived by pasting your public address to
 [Rinkeby Etherscan](https://rinkeby.etherscan.io/)
 
-If Rinkeby Etherscan shows that the ETH has been sent to the address but you don't see it in you Metamask wallet.  Sometimes you may have to change to another network and change back to refresh the account.
-You can also reset the account as well if you don't see the ETH show up
-Goto Settings > Advanced > Reset Account
+to migrate contracts to Ropsten or Rinkeby
+cd cryptoCollectible1155/filipERC1155
+### `truffle migrate --reset --network ropsten`
+or
+### `1truffle migrate --reset --network rinkeby`
 
-Now that Metamask is pointing to Rinkeby network and you have selected an account that has Rinkeby ETH you can now deploy the smart contracts to Rinkeby...
 
-
-Lets stop the local truffle develop blockchain
-In the shell that truffle develop is running in
-### `.exit`
-
-Now we can deploy to Rinkeby
-### `truffle migrate --reset --network rinkeby`
-
-Now you should be able to refresh you app and it should connect to the Rinkeby Testnet. A good indication that you are now pointing to Rinkeby is that the saved value should revert to the default 'cookies'. 
-
-Extra Credit: 
-See if you can bring up the app in your mobile MetaMask browser. You will need to make sure you are connected to the Rinkeby Network and that you have selected an address that has Rinkeby ETH. 
 
 
 
