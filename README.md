@@ -14,7 +14,7 @@ Download the Github repo to a local project folder
 [Github React-Dapp](https://github.com/joeqpn/cryptoCollectible1155)
 
 Now we need to install dependencies described in package.json or npm-shrinkwrap.json package-lock.json into the node_modules folder...
-cd into the filipERC1155/ direcory and run npm install
+### `cd into filipERC1155/`
 ### `npm install`
 After running the npm install command ensure a node_modules folder now exists in the filipERC1155 directory.
 
